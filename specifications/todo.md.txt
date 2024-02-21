@@ -1,0 +1,33 @@
+- Compilation system (remove compiled sources, compile new sources) [windows :check: linux :check]
+- Backup of sources :check: (remove last backup, copy new backup)
+- Compilation hash :check:
+- Avoid compilation if hash is same as previous and compiled sources folder exists :check:
+- Process execution info in logs and console :check: (os, process PID, exit value, errors, infos etc)
+- Open in another terminal [windows :check: linux :check]
+- Colors :check:
+- Arrows, escape and enter keys use :check:
+- Show grid (TUI) :check:)
+- Show token current position :check:
+- Place token :check: (number or enter)
+- Place token animation :check:
+- Win tokens in yellow :check:
+- Chaos AI (totally random) :check:
+- Current session score show :check:
+
+- Avoid compilation if modifications dates are same as previous and compiled sources folder exists
+- Improve exception system IN PROGRESS
+- Logs system [info, warns and errors]
+- Redirect consoel messages to save this (except TUI)
+- Console mode : disable TUI to show console messages
+- IA separated from VIEW
+- View interfacing improvements
+- View styles
+- Upper menu
+- Start menu (player type selection [IA, network or local], symbols and colors selection, difficulty preset or setting all [if IA], save preset [automaticly])
+- Database
+- Show session score and global score (with database)
+- API
+- Make AI can use regex pattern to choose next action
+- AI learn patterns (into database) thank to actions historics, victory action, % of win chance.
+- IA by difficulties (random, patterns)
+- Network
