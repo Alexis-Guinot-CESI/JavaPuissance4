@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="windows">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/windows/jcurses-windows-0.9.5b.zip!/" />
+      <root url="jar://$PROJECT_DIR$/lib/windows/jcurses.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

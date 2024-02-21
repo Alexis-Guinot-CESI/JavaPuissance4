@@ -1,0 +1,13 @@
+Thread Thread[#1,main,5,main] caught exception java.lang.UnsatisfiedLinkError: P:\Seynax\java_puissance4\Puissance4\lib\windows\libjcurses.dll: Can't load IA 32-bit .dll on a AMD 64-bit platform
+
+java.lang.UnsatisfiedLinkError: P:\Seynax\java_puissance4\Puissance4\lib\windows\libjcurses.dll: Can't load IA 32-bit .dll on a AMD 64-bit platform
+	at java.base/jdk.internal.loader.NativeLibraries.load(Native Method)
+	at java.base/jdk.internal.loader.NativeLibraries$NativeLibraryImpl.open(NativeLibraries.java:331)
+	at java.base/jdk.internal.loader.NativeLibraries.loadLibrary(NativeLibraries.java:197)
+	at java.base/jdk.internal.loader.NativeLibraries.loadLibrary(NativeLibraries.java:139)
+	at java.base/java.lang.ClassLoader.loadLibrary(ClassLoader.java:2418)
+	at java.base/java.lang.Runtime.load0(Runtime.java:852)
+	at java.base/java.lang.System.load(System.java:2025)
+	at jcurses.system.Toolkit.<clinit>(Toolkit.java:37)
+	at connectfour.view.JCursesGameViewIA.<init>(JCursesGameViewIA.java:36)
+	at connectfour.app.ConnectFour.main(ConnectFour.java:16)
