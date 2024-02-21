@@ -31,3 +31,6 @@ lastCompilation.md5
 *.iml
 sources
 sources.txt
+logs
+logs.txt
+logs/
