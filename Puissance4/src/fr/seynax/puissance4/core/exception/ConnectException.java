@@ -1,4 +1,4 @@
-package connectfour.model;
+package fr.seynax.puissance4.core.exception;
 
 public class ConnectException extends Exception {
 

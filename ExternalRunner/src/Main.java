@@ -37,10 +37,10 @@ public class Main
 
         try
         {
-            var           libSeperator  = ":";
+            var           libSeparator  = ":";
             if (operatingSystemType().contentEquals("windows"))
             {
-                libSeperator = ";";
+                libSeparator = ";";
             }
             if(compilationNeeded)
             {
@@ -60,57 +60,41 @@ public class Main
                     }
                 }
 
-                StringBuilder processReport = new StringBuilder();
-                var classpath = " -cp " + workingDirectory.getAbsolutePath() + libSeperator + new File("lib/" + operatingSystemType() + "/jcurses.jar").getAbsolutePath();
-
                 if (!compilationDirectory.exists() && !compilationDirectory.mkdirs())
                 {
                     throw new RuntimeException("Cannot make sources compilation folder !");
                 }
-                var command = "javac" + classpath + " -d " + compilationDirectory.getAbsolutePath() + " @" + sourcesFile.getAbsolutePath();
-                if (operatingSystemType().contentEquals("windows"))
-                {
-                    command = command.replace("\\", "/");
-                }
 
-                var success = runProcessIntoAnotherTerminal(processReport, workingDirectory, command);
-                if(!success) {
-                    System.err.println("Java compilation failed !");
-                } else {
-                    System.out.println("Java compilation success !");
-                }
-                System.out.println();
-                System.out.println(processReport);
-                System.out.println();
-                System.out.println();
-
-                try(var bufferedWriter = new BufferedWriter(new FileWriter(lastHashingFile))) {
-                    bufferedWriter.write(currentHash);
+                if(runProcessIntoAnotherTerminal(workingDirectory, false,  "javac" + classPath(workingDirectory, "lib/" + operatingSystemType() + "/jcurses.jar") + " -d " + compilationDirectory.getAbsolutePath() + " @" + sourcesFile.getAbsolutePath())) {
+                  try(var bufferedWriter = new BufferedWriter(new FileWriter(lastHashingFile))) {
+                     bufferedWriter.write(currentHash);
+                  }
                 }
             }
 
-            var processReport = new StringBuilder();
-            var classpath = " -cp " + compilationDirectory.getAbsolutePath() + libSeperator + new File("lib/" + operatingSystemType() + "/*").getAbsolutePath();
-            var command =  "java" + classpath + " connectfour.app.ConnectFour";
-            if(operatingSystemType().contentEquals("windows")) {
-                command = command.replace("\\", "/");
-            }
-
-            var success = runProcessIntoAnotherTerminal(processReport, workingDirectory, command);
-            if(!success) {
-                System.err.println("Java compilation failed !");
-            } else {
-                System.out.println("Java compilation success !");
-            }
-            System.out.println();
-            System.out.println(processReport);
-            System.out.println();
-            System.out.println();
+            runProcessIntoAnotherTerminal(workingDirectory, true,  "java" + classPath(compilationDirectory, "lib/" + operatingSystemType() + "/jcurses.jar") + " fr.seynax.puissance4.Puissance4");
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
+    }
+
+    public static String classPath(File baseDirectoryIn, String... librariesIn) {
+        var libSeparator = ':';
+        if(operatingSystemType().contentEquals("windows")) {
+            libSeparator = ';';
+        }
+
+        var classpath = " -cp " + baseDirectoryIn.getAbsolutePath() + libSeparator;
+        for(int i = 0; i < librariesIn.length; i ++) {
+            if(i > 0) {
+                classpath += libSeparator;
+            }
+            classpath += new File("lib/" + operatingSystemType() + "/*").getAbsolutePath();
+        }
+
+        return classpath;
     }
 
     public static void copyDirectory(String from, String to) throws IOException
@@ -177,7 +161,7 @@ public class Main
         return filesListIn;
     }
 
-    private static boolean runProcessIntoAnotherTerminal(StringBuilder processReport, File workingDirectory, String... commands) throws Exception
+    private static boolean runProcessIntoAnotherTerminal(File workingDirectory, boolean stay, String... commands) throws Exception
     {
         List<String> commandsList = new ArrayList<>();
 
@@ -186,7 +170,11 @@ public class Main
             commandsList.add("/c");
             commandsList.add("start");
             commandsList.add("cmd.exe");
-            commandsList.add("/k");
+            if(stay) {
+                commandsList.add("/k");
+            } else {
+                commandsList.add("/c");
+            }
             commandsList.add("\"" + commandOf(commands) + "\"");
         } else {
             commandsList.add("gnome-terminal");
@@ -199,23 +187,24 @@ public class Main
             commandsList.add("bash");
         }
 
-        return runProcess(processReport, workingDirectory, commandsList);
+        return runProcess(workingDirectory, commandsList);
     }
 
     private static <T> List<T> toList(T... objects) {
         return Arrays.asList(objects);
     }
 
-    private static boolean runProcess(final StringBuilder processReport, File workingDirectory, String... commands)
+    private static boolean runProcess(File workingDirectory, String... commands)
     {
-        return runProcess(processReport, workingDirectory, toList(commands));
+        return runProcess(workingDirectory, toList(commands));
     }
 
-    private static boolean runProcess(StringBuilder processReport, File workingDirectory, List<String> commandList)
+    private static boolean runProcess(File workingDirectory, List<String> commandList)
     {
         final ProcessBuilder processBuilder = new ProcessBuilder(commandList);
         processBuilder.directory(workingDirectory);
 
+        var processReport = new StringBuilder();
         var indent = makeSectionReport(0, processReport, "NEW PROCESS LAUNCHED", 64);
 
         Process process = null;
@@ -236,7 +225,42 @@ public class Main
             processReport.append(start(indent) + "- InterruptedException : " + e.getMessage());
         }
 
-	    return process != null && process.exitValue() >= 0;
+        var success = process != null && process.exitValue() >= 0;
+
+        if(!success) {
+            System.err.println("Java compilation failed !");
+        } else {
+            System.out.println("Java compilation success !");
+        }
+        System.out.println();
+        System.out.println(processReport);
+        System.out.println();
+        System.out.println();
+
+
+        var logsFile = new File("logs/process_execution_" + process.pid() + ".logs");
+        if (!logsFile.getParentFile().exists() && !logsFile.getParentFile().mkdirs()) {
+            throw new RuntimeException("Failed to make logs directory !");
+        }
+        try {
+            if(!logsFile.createNewFile()) {
+                throw new RuntimeException("Failed to make logs file for " + process.pid() + " process pid !");
+            }
+        }
+        catch (IOException e) {
+            processReport.append(start(indent) + "- IOException : " + e.getMessage());
+            throw new RuntimeException("Failed to make logs file for " + process.pid() + " process pid ! " + e.getMessage());
+        }
+
+        try(var bufferedWriter = new BufferedWriter(new FileWriter(logsFile))) {
+            bufferedWriter.write(processReport.toString());
+        }
+        catch (IOException e) {
+            processReport.append(start(indent) + "- IOException : " + e.getMessage());
+	        throw new RuntimeException(e);
+        }
+
+	    return success;
     }
 
     private static Collection<String> linesFromStream(InputStream inputStream) throws IOException
@@ -265,6 +289,9 @@ public class Main
             if (i > 0)
             {
                 commandString.append(" ");
+            }
+            if(operatingSystemType().contentEquals("windows")) {
+                command = command.replace("\\", "/");
             }
             commandString.append(command);
             i++;

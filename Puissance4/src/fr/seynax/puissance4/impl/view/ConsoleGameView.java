@@ -1,15 +1,17 @@
-package connectfour.view;
+package fr.seynax.puissance4.impl.view;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-import connectfour.model.ConnectException;
-import connectfour.model.Game;
-import connectfour.model.Tokens;
+import fr.seynax.puissance4.core.exception.ConnectException;
+import fr.seynax.puissance4.api.model.Game;
+import fr.seynax.puissance4.core.exception.Tokens;
+import fr.seynax.puissance4.api.view.GameView;
 
-public class ConsoleGameView implements GameView {
-
+public class ConsoleGameView implements GameView
+{
 	// COLORS
+
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_BLACK = "\u001B[30m";
     public static final String ANSI_RED = "\u001B[31m";
@@ -55,10 +57,10 @@ public class ConsoleGameView implements GameView {
 	// METHODS
 
 	@Override
-	public void play() throws ConnectException {
+	public void play() {
 		clearConsole();
-		displayGrid();
 		try {
+			displayGrid();
 			do {
 				errorMessage = null;
 				displayGameState();

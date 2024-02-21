@@ -1,13 +1,14 @@
-package connectfour.app;
+package fr.seynax.puissance4;
 
-import connectfour.model.ConnectException;
-import connectfour.model.ImplGame;
-import connectfour.view.GameView;
-import connectfour.view.JCursesGameViewIA;
+import fr.seynax.puissance4.core.exception.ConnectException;
+import fr.seynax.puissance4.impl.model.ImplGame;
+import fr.seynax.puissance4.api.view.GameView;
+import fr.seynax.puissance4.impl.view.JCursesGameViewIA;
 
 import java.io.*;
 
-public class ConnectFour {
+public class Puissance4
+{
 	public static void main(String[] args) throws Exception {
 		ExceptionCatcher.start();
 		// Cr�ation du jeu
@@ -19,7 +20,7 @@ public class ConnectFour {
 		try {
 			System.out.println("PLAY !");
 			gameView.play();
-		} catch (ConnectException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
@@ -42,7 +43,9 @@ public class ConnectFour {
 
 		public void uncaughtException(Thread t, Throwable e)
 		{
-			try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(new File("logs.txt"), true))) {
+			var logsFilePath = new File("logs.txt").getAbsolutePath();
+			try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(logsFilePath, false))) {
+				System.err.println("WRITE EXCEPTION IN : " + logsFilePath);
 				bufferedWriter.write(String.format("Thread %s caught exception %s%n", t, e) + "\n" + getStackTrace(e));
 			} catch (IOException ex) {
                 throw new RuntimeException(ex);

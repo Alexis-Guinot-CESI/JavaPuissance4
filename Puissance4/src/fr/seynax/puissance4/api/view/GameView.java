@@ -1,6 +1,6 @@
-package connectfour.view;
+package fr.seynax.puissance4.api.view;
 
-import connectfour.model.ConnectException;
+import fr.seynax.puissance4.core.exception.ConnectException;
 
 /**
  * Une vue de jeu.
@@ -8,11 +8,9 @@ import connectfour.model.ConnectException;
  *  et g�re les interactions avec l'utilisateur.
  */
 public interface GameView {
-	
 	/**
 	 * Lance le syst�me de jeu.
 	 * @throws ConnectException 
 	 */
-	void play() throws ConnectException;
-
+	void play() throws InterruptedException;
 }

@@ -1,14 +1,17 @@
-package connectfour.view;
+package fr.seynax.puissance4.impl.view;
 
-import connectfour.model.ConnectException;
-import connectfour.model.Game;
-import connectfour.model.Tokens;
+import fr.seynax.puissance4.core.exception.ConnectException;
+import fr.seynax.puissance4.api.model.Game;
+import fr.seynax.puissance4.core.exception.Tokens;
+import fr.seynax.puissance4.api.view.GameView;
 import jcurses.system.CharColor;
 import jcurses.system.Toolkit;
 
+import javax.tools.Tool;
 import java.util.*;
 
-public class JCursesGameViewIA implements GameView {
+public class JCursesGameViewIA implements GameView
+{
 	// ATTRIBUTES
 
 	private final Game game;
@@ -55,7 +58,8 @@ public class JCursesGameViewIA implements GameView {
 	}
 
 	@Override
-	public void play() {
+	public void play() throws InterruptedException
+	{
 		try {
 			if (!game.isOver()) {
 				if (redraw) {
@@ -64,49 +68,20 @@ public class JCursesGameViewIA implements GameView {
 				}
 
 				if (needAIChoice) {
-					long startTime = System.nanoTime();
-					boolean rowAvailable = false;
-					while (true) {
-						this.tokenPosition = (int) ((Math.random() * Game.COLUMNS) % Game.COLUMNS);
-                        for (int i = 0; i < Game.ROWS; i++) {
-							if (game.getToken(this.tokenPosition, (Game.ROWS - 1) - i) == null) {
-								rowAvailable = true;
-							}
-						}
-
-						if (rowAvailable) {
-							break;
-						}
-
-						if(System.nanoTime() - startTime >= 1_000_000L) {
-							break;
-						}
-					}
-					if(rowAvailable) {
+					this.tokenPosition = new Random().nextInt(Game.COLUMNS-1);
+					if(game.isAvailable(this.tokenPosition)) {
 						needAIChoice = false;
 						displayToken(this.tokenPosition, 2);
 					}
 				} else {
-					try {
-						putToken();
-					} catch (NumberFormatException e) {
-						errorMessage = "Je n'ai pas compris cette réponse... " + e.getMessage();
-					} catch (ConnectException e) {
-						errorMessage = e.getMessage();
-					}
+					putToken();
 					if (!game.isOver()) {
 						needAIChoice = true;
-
-						if (errorMessage != null) {
-							messages.addAll(Arrays.asList(errorMessage.split("\n")));
-							redraw = true;
-							needAIChoice = true;
-						}
 					}
 				}
 			} else {
 				redraw();
-				Thread.sleep(4000);
+				Thread.sleep(2000);
 				restartRequest = true;
 			}
 
@@ -117,15 +92,28 @@ public class JCursesGameViewIA implements GameView {
 				tokenPosition = Game.COLUMNS / 2;
 				needAIChoice = true;
 			}
-			if (!exitRequest) {
-				play();
-			} else {
-				clearConsole();
-				printLn("EXIT_SUCCESS", CharColor.GREEN);
-			}
-		} catch (Exception e) {
-			messages.addAll(Arrays.asList(e.getMessage().split("\n")));
+		}catch (NumberFormatException e) {
+			messages.addAll(Arrays.asList(("NumberFormatException : " + e.getMessage()).split("\n")));
 			redraw = true;
+			needAIChoice = true;
+			this.tokenPosition = new Random().nextInt(Game.COLUMNS-1);
+		} catch (IllegalArgumentException e) {
+			messages.addAll(Arrays.asList(("IllegalArgumentException : " + e.getMessage()).split("\n")));
+			redraw = true;
+			needAIChoice = true;
+			this.tokenPosition = new Random().nextInt(Game.COLUMNS-1);
+		}  catch (ConnectException e) {
+			messages.addAll(Arrays.asList(("ConnectException : " + e.getMessage()).split("\n")));
+			redraw = true;
+			needAIChoice = true;
+			this.tokenPosition = new Random().nextInt(Game.COLUMNS-1);
+		}
+
+		if (!exitRequest) {
+			play();
+		} else {
+			clearConsole();
+			printLn("EXIT_SUCCESS", CharColor.GREEN);
 		}
 	}
 	
@@ -136,6 +124,7 @@ public class JCursesGameViewIA implements GameView {
 		if(game.isOver()) {
 			return;
 		}
+
 		short lastForegroundColor = charColor.getForeground();
 		var token = game.getCurrentPlayer();
 		this.charColor.setForeground(token.getJcursesColor());

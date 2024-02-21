@@ -1,10 +1,16 @@
-package connectfour.model;
+package fr.seynax.puissance4.impl.model;
 
-import java.sql.Array;
+import fr.seynax.puissance4.impl.model.grid.GridList;
+import fr.seynax.puissance4.api.model.Game;
+import fr.seynax.puissance4.api.model.Grid;
+import fr.seynax.puissance4.core.exception.ConnectException;
+import fr.seynax.puissance4.core.exception.Tokens;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class ImplGame implements Game {
+public class ImplGame implements Game
+{
 	private final Grid grid;
 	
 	public Tokens currentPlayer;
@@ -18,13 +24,20 @@ public class ImplGame implements Game {
 	private Tokens winner;
 	
 	public ImplGame() {
-		grid = new ImplListGrid(Game.COLUMNS,Game.ROWS);
+		grid = new GridList(Game.COLUMNS,Game.ROWS);
 		winPositions = new ArrayList<>();
 		init();
 	}
-	
+
 	@Override
-	public Tokens getToken(int x, int y) throws ConnectException{
+	public boolean isAvailable(final int x)
+	{
+		return grid.isAvailable(x);
+	}
+
+	@Override
+	public Tokens getToken(int x, int y) throws ConnectException
+	{
 		return this.grid.getToken(x,y);
 	}
 	

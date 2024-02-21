@@ -1,4 +1,7 @@
-package connectfour.model;
+package fr.seynax.puissance4.api.model;
+
+import fr.seynax.puissance4.core.exception.ConnectException;
+import fr.seynax.puissance4.core.exception.Tokens;
 
 import java.util.List;
 
@@ -11,9 +14,10 @@ import java.util.List;
  * A la cr�ation, le jeu est initialis�.
  */
 public interface Game {
+
 	public final static class TokenPosition {
 		private int x;
-		private int y;
+		private int    y;
 		private Tokens tokens;
 
 		public TokenPosition(int x, int y, Tokens tokens) {
@@ -43,13 +47,15 @@ public interface Game {
 	
 	/** Nombre de jetons � aligner pour gagner */
 	static final int REQUIRED_TOKENS = 4;
-	
+
+	boolean isAvailable(int x);
+
 	/**
 	 * R�cup�re le jeton pr�sent en (x,y).
 	 * @param x la colonne
 	 * @param y la ligne
 	 * @return le jeton pr�sent, null si aucun
-	 * @throws ConnectException 
+	 * @throws ConnectException
 	 */
 	Tokens getToken(int x, int y) throws ConnectException;
 	

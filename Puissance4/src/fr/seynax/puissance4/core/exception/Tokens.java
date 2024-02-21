@@ -1,6 +1,6 @@
-package connectfour.model;
+package fr.seynax.puissance4.core.exception;
 
-import connectfour.view.ConsoleGameView;
+import fr.seynax.puissance4.impl.view.ConsoleGameView;
 import jcurses.system.CharColor;
 
 public enum Tokens {

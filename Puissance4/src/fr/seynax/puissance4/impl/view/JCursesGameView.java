@@ -1,18 +1,18 @@
-package connectfour.view;
+package fr.seynax.puissance4.impl.view;
 
-import connectfour.model.ConnectException;
-import connectfour.model.Game;
-import connectfour.model.Tokens;
+import fr.seynax.puissance4.core.exception.ConnectException;
+import fr.seynax.puissance4.api.model.Game;
+import fr.seynax.puissance4.core.exception.Tokens;
+import fr.seynax.puissance4.api.view.GameView;
 import jcurses.system.CharColor;
 import jcurses.system.Toolkit;
 
-import javax.swing.text.AttributeSet;
-import javax.tools.Tool;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class JCursesGameView implements GameView {
+public class JCursesGameView implements GameView
+{
 	// ATTRIBUTES
 
 	private final Game game;
@@ -58,13 +58,13 @@ public class JCursesGameView implements GameView {
 	}
 
 	@Override
-	public void play() throws ConnectException {
-		if(redraw) {
-			redraw();
-			redraw = false;
-		}
-
+	public void play() {
 		try {
+			if(redraw) {
+				redraw();
+				redraw = false;
+			}
+
 			var inputChar = Toolkit.readCharacter();
 			errorMessage = null;
 			switch(inputChar.getCode()) {
