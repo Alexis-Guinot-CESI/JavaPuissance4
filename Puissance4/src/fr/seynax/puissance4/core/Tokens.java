@@ -1,4 +1,4 @@
-package fr.seynax.puissance4.core.exception;
+package fr.seynax.puissance4.core;
 
 import fr.seynax.puissance4.impl.view.ConsoleGameView;
 import jcurses.system.CharColor;

@@ -1,30 +1,30 @@
 package fr.seynax.puissance4.impl.model;
 
+import fr.seynax.puissance4.api.model.IGrid;
 import fr.seynax.puissance4.impl.model.grid.GridList;
-import fr.seynax.puissance4.api.model.Game;
-import fr.seynax.puissance4.api.model.Grid;
+import fr.seynax.puissance4.api.model.IGridGameplay;
 import fr.seynax.puissance4.core.exception.ConnectException;
-import fr.seynax.puissance4.core.exception.Tokens;
+import fr.seynax.puissance4.core.Tokens;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ImplGame implements Game
+public class GameplayPuissance4 implements IGridGameplay
 {
-	private final Grid grid;
+	private final IGrid grid;
 	
 	public Tokens currentPlayer;
 	
 	static private final Tokens[] TOKEN_VALUES = Tokens.values();
 	
-	private boolean Over;
+	private boolean over;
 
 	private List<TokenPosition> winPositions;
 
 	private Tokens winner;
 	
-	public ImplGame() {
-		grid = new GridList(Game.COLUMNS,Game.ROWS);
+	public GameplayPuissance4() {
+		grid = new GridList(IGridGameplay.COLUMNS, IGridGameplay.ROWS);
 		winPositions = new ArrayList<>();
 		init();
 	}
@@ -44,7 +44,7 @@ public class ImplGame implements Game
 	@Override
 	public void init() {
 		winPositions.clear();
-		this.Over = false;
+		this.over = false;
 		this.winner = null;
 		this.grid.init();
 		this.currentPlayer = TOKEN_VALUES[(int)(Math.random() * TOKEN_VALUES.length)];
@@ -53,49 +53,58 @@ public class ImplGame implements Game
 	@Override
 	public void putToken(int x) throws ConnectException {
 		this.grid.putToken(this.getCurrentPlayer(), x);	
-		this.Over = this.calculateOver(x);
+		this.over = this.calculateOver(x);
 		this.currentPlayer = this.getNextPlayer();
 	}
 
 	@Override
 	public Tokens getCurrentPlayer() {
-		// TODO Auto-generated method stub
 		return currentPlayer;
 	}
 
 	@Override
 	public boolean isOver() {
-		return Over;
+		return over;
 	}
 
 	private boolean calculateOver(int x) throws ConnectException {
-		if (inspectDiagonaleNWSE(x, grid.getRowOfLastPutToken()) >= Game.REQUIRED_TOKENS || inspectDiagonaleNESW(x, grid.getRowOfLastPutToken()) >= Game.REQUIRED_TOKENS )  {
+		if (inspectLeftDiagonal(x, grid.getRowOfLastPutToken()) >= IGridGameplay.REQUIRED_TOKENS)  {
+			this.winner = getCurrentPlayer();
+			return true;
+		}
+
+		if(inspectRightDiagonal(x, grid.getRowOfLastPutToken()) >= IGridGameplay.REQUIRED_TOKENS) {
+			this.winner = getCurrentPlayer();
+			return true;
+		}
+
+		if (inspectVertical(x, grid.getRowOfLastPutToken()) >= IGridGameplay.REQUIRED_TOKENS) {
 			this.winner = getCurrentPlayer();
 			return true;
 		}
 		
-		if (inspectVerticalS(x, grid.getRowOfLastPutToken()) >= Game.REQUIRED_TOKENS) {
+		if (inspectHorizontalW(x, grid.getRowOfLastPutToken()) >= IGridGameplay.REQUIRED_TOKENS) {
 			this.winner = getCurrentPlayer();
 			return true;
 		}
-		
-		if (inspectHorizontalW(x, grid.getRowOfLastPutToken()) >= Game.REQUIRED_TOKENS || inspectHorizontalE(x, grid.getRowOfLastPutToken())>= Game.REQUIRED_TOKENS) {
+
+		if(inspectHorizontal(x, grid.getRowOfLastPutToken()) >= IGridGameplay.REQUIRED_TOKENS) {
 			this.winner = getCurrentPlayer();
 			return true;
 		}
 
 		winPositions.clear();
-		for (int column = 0 ; column < Game.COLUMNS ; column ++) {
-				for (int row = 0 ; row < Game.ROWS ; row ++) {
-					if (grid.getToken(column, row) == null) {
-						return false;
-					}
+		for (int column = 0; column < IGridGameplay.COLUMNS ; column ++) {
+			for (int row = 0; row < IGridGameplay.ROWS ; row ++) {
+				if (grid.getToken(column, row) == null) {
+					return false;
 				}
+			}
 		}
 		return true;
 	}
 	
-	private int inspectDiagonaleNWSE(int x,int y) throws ConnectException {
+	private int inspectLeftDiagonal(int x, int y) throws ConnectException {
 		winPositions.clear();
 		winPositions.add(new TokenPosition(x, y, this.currentPlayer));
 		int foundInLine = 0;
@@ -110,7 +119,7 @@ public class ImplGame implements Game
 		 return foundInLine + 1;
 	}
 	
-	private int inspectDiagonaleNESW(int x,int y) throws ConnectException {
+	private int inspectRightDiagonal(int x, int y) throws ConnectException {
 		winPositions.clear();
 		winPositions.add(new TokenPosition(x, y, this.currentPlayer));
 		int foundInLine = 0;
@@ -125,7 +134,7 @@ public class ImplGame implements Game
 		 return foundInLine + 1;
 	}
 	
-	private int inspectVerticalS(int x, int y) throws ConnectException {
+	private int inspectVertical(int x, int y) throws ConnectException {
 		winPositions.clear();
 		int foundInLine = 0;
 		for (int i = y; i >= 0 ; i--) {
@@ -138,7 +147,7 @@ public class ImplGame implements Game
 		return foundInLine;
 	}
 	
-	private int inspectHorizontalE(int x, int y) throws ConnectException {
+	private int inspectHorizontal(int x, int y) throws ConnectException {
 		winPositions.clear();
 		int foundInLine = 0;
 		for (int i = x; i < COLUMNS; i++) {
@@ -154,11 +163,11 @@ public class ImplGame implements Game
 	private int inspectHorizontalW(int x, int y) throws ConnectException {
 		winPositions.clear();
 		int foundInLine = 0;
-		for (int i = x; i >= 0 ; i-- ) {
+		for (int i = x; i >= 0; i --) {
 			if (getToken(i, y) != currentPlayer) {
 				break;
 			}
-			winPositions.add(new TokenPosition(x, i, this.currentPlayer));
+			winPositions.add(new TokenPosition(i, y, this.currentPlayer));
 			foundInLine++;
 		}
 		return foundInLine;
@@ -166,14 +175,11 @@ public class ImplGame implements Game
 	
 	@Override
 	public Tokens getWinner() {
-		// TODO Auto-generated method stub
 		return winner;
 	}
-	
-	
+
 	private Tokens getNextPlayer() {
-		int indice = (currentPlayer.ordinal()+ 1)%TOKEN_VALUES.length;
-		return TOKEN_VALUES[indice];
+		return TOKEN_VALUES[(currentPlayer.ordinal() + 1) % TOKEN_VALUES.length];
 	}
 
 	public List<TokenPosition> getWinPositions() {

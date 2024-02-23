@@ -1,7 +1,7 @@
 package fr.seynax.puissance4.api.model;
 
 import fr.seynax.puissance4.core.exception.ConnectException;
-import fr.seynax.puissance4.core.exception.Tokens;
+import fr.seynax.puissance4.core.Tokens;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ import java.util.List;
  *  ou lorsque la grille est remplie (auquel cas il y a match nul).
  * A la cr�ation, le jeu est initialis�.
  */
-public interface Game {
+public interface IGridGameplay {
 
 	public final static class TokenPosition {
 		private int x;

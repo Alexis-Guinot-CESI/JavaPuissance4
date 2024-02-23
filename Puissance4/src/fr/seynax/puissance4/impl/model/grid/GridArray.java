@@ -1,10 +1,10 @@
 package fr.seynax.puissance4.impl.model.grid;
 
-import fr.seynax.puissance4.api.model.Grid;
+import fr.seynax.puissance4.api.model.IGrid;
 import fr.seynax.puissance4.core.exception.ConnectException;
-import fr.seynax.puissance4.core.exception.Tokens;
+import fr.seynax.puissance4.core.Tokens;
 
-public class GridArray implements Grid
+public class GridArray implements IGrid
 {
 	private final Tokens[][] grid;
 	private Integer rowOfLastPutToken;

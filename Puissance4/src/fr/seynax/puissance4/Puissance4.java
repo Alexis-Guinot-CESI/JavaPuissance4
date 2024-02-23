@@ -1,8 +1,7 @@
 package fr.seynax.puissance4;
 
-import fr.seynax.puissance4.core.exception.ConnectException;
-import fr.seynax.puissance4.impl.model.ImplGame;
-import fr.seynax.puissance4.api.view.GameView;
+import fr.seynax.puissance4.impl.model.GameplayPuissance4;
+import fr.seynax.puissance4.api.model.IGame;
 import fr.seynax.puissance4.impl.view.JCursesGameViewIA;
 
 import java.io.*;
@@ -14,7 +13,7 @@ public class Puissance4
 		// Cr�ation du jeu
 		// On instancie une vue, � laquelle on fournit un mod�le (MVC)
 		System.out.println("INIT !");
-		GameView gameView = new JCursesGameViewIA(new ImplGame());
+		IGame gameView = new JCursesGameViewIA(new GameplayPuissance4());
 		
 		// Lancement du syst�me de jeu
 		try {

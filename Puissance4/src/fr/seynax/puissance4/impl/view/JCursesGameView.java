@@ -1,9 +1,9 @@
 package fr.seynax.puissance4.impl.view;
 
+import fr.seynax.puissance4.api.model.IGridGameplay;
 import fr.seynax.puissance4.core.exception.ConnectException;
-import fr.seynax.puissance4.api.model.Game;
-import fr.seynax.puissance4.core.exception.Tokens;
-import fr.seynax.puissance4.api.view.GameView;
+import fr.seynax.puissance4.core.Tokens;
+import fr.seynax.puissance4.api.model.IGame;
 import jcurses.system.CharColor;
 import jcurses.system.Toolkit;
 
@@ -11,11 +11,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class JCursesGameView implements GameView
+public class JCursesGameView implements IGame
 {
 	// ATTRIBUTES
 
-	private final Game game;
+	private final IGridGameplay game;
 
 	private String userInput;
 	private String errorMessage;
@@ -34,7 +34,7 @@ public class JCursesGameView implements GameView
 
 	// CONSTRUCTOR
 
-	public JCursesGameView(Game game) {
+	public JCursesGameView(IGridGameplay game) {
 		if (game == null) {
 			throw new IllegalArgumentException("game ne peut �tre null");
 		}
@@ -42,7 +42,7 @@ public class JCursesGameView implements GameView
 		Toolkit.init();
 		this.y = 0;
 		this.x = 0;
-		tokenPosition = (int) (Game.COLUMNS / 2);
+		tokenPosition = (int) (IGridGameplay.COLUMNS / 2);
 		this.messages = new ArrayList<>();
 		this.charColor = new CharColor(CharColor.BLACK, CharColor.WHITE);
 		redraw = true;
@@ -76,7 +76,7 @@ public class JCursesGameView implements GameView
 					this.displayToken(tokenPosition, 2);
 					break;
 				case 261:
-					tokenPosition = (tokenPosition+1) % Game.COLUMNS;
+					tokenPosition = (tokenPosition+1) % IGridGameplay.COLUMNS;
 					this.displayToken(tokenPosition, 2);
 					break;
 				case 27:
@@ -120,7 +120,7 @@ public class JCursesGameView implements GameView
 			game.init();
 			restartRequest = false;
 			redraw = true;
-			tokenPosition = (int) (Game.COLUMNS / 2);
+			tokenPosition = (int) (IGridGameplay.COLUMNS / 2);
 		}
 
 		if (!exitRequest) {
@@ -142,14 +142,14 @@ public class JCursesGameView implements GameView
 		short lastForegroundColor = charColor.getForeground();
 		var token = game.getCurrentPlayer();
 		this.charColor.setForeground(token.getJcursesColor());
-		for(int i = 0; i < Game.ROWS; i ++) {
+		for(int i = 0; i < IGridGameplay.ROWS; i ++) {
             try {
                 Thread.sleep(300);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
 
-			if(game.getToken(tokenPosition, (Game.ROWS-1) - i) != null) {
+			if(game.getToken(tokenPosition, (IGridGameplay.ROWS-1) - i) != null) {
 				break;
 			}
 
@@ -159,7 +159,7 @@ public class JCursesGameView implements GameView
 		this.charColor.setForeground(lastForegroundColor);
 		game.putToken(this.tokenPosition);
 		redraw = true;
-		tokenPosition = (int) (Game.COLUMNS / 2);
+		tokenPosition = (int) (IGridGameplay.COLUMNS / 2);
 	}
 
 	private void displayGameState() {
@@ -175,7 +175,7 @@ public class JCursesGameView implements GameView
 		} else {
 			print("C'est au tour de [");
 			print("" + game.getCurrentPlayer().getSymbol(), game.getCurrentPlayer().getJcursesColor());
-			printLn("] ! [0-" + (Game.COLUMNS - 1) + "] : ");
+			printLn("] ! [0-" + (IGridGameplay.COLUMNS - 1) + "] : ");
 		}
 	}
 
@@ -196,18 +196,18 @@ public class JCursesGameView implements GameView
 	private void displayGrid() throws ConnectException {
 		printLn("");
 		Tokens token;
-		for (int x = 0; x < Game.COLUMNS; x++) {
+		for (int x = 0; x < IGridGameplay.COLUMNS; x++) {
 			print("   " + x + "  ");
 		}
 		printLn("");
 		displayToken(tokenPosition, -1);
 
-		for (int y = Game.ROWS - 1; y >= 0; y--) {
-			for (int x = 0; x < Game.COLUMNS; x++) {
+		for (int y = IGridGameplay.ROWS - 1; y >= 0; y--) {
+			for (int x = 0; x < IGridGameplay.COLUMNS; x++) {
 				print("|     ");
 			}
 			printLn("|");
-			for (int x = 0; x < Game.COLUMNS; x++) {
+			for (int x = 0; x < IGridGameplay.COLUMNS; x++) {
 				print("|  ");
 				token = game.getToken(x, y);
 				if (token == null) {
@@ -225,7 +225,7 @@ public class JCursesGameView implements GameView
 				print("  ");
 			}
 			printLn("|");
-			for (int x = 0; x < Game.COLUMNS; x++) {
+			for (int x = 0; x < IGridGameplay.COLUMNS; x++) {
 				print("|_____");
 			}
 			printLn("|");

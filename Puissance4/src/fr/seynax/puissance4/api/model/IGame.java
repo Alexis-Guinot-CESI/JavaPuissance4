@@ -1,4 +1,4 @@
-package fr.seynax.puissance4.api.view;
+package fr.seynax.puissance4.api.model;
 
 import fr.seynax.puissance4.core.exception.ConnectException;
 
@@ -7,7 +7,7 @@ import fr.seynax.puissance4.core.exception.ConnectException;
  * Prend un mod�le de jeu en argument
  *  et g�re les interactions avec l'utilisateur.
  */
-public interface GameView {
+public interface IGame {
 	/**
 	 * Lance le syst�me de jeu.
 	 * @throws ConnectException 

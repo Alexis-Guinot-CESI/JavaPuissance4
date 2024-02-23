@@ -1,7 +1,7 @@
 package fr.seynax.puissance4.api.model;
 
 import fr.seynax.puissance4.core.exception.ConnectException;
-import fr.seynax.puissance4.core.exception.Tokens;
+import fr.seynax.puissance4.core.Tokens;
 
 /**
  * Une grille du jeu Connect Four.
@@ -13,7 +13,7 @@ import fr.seynax.puissance4.core.exception.Tokens;
  * Une exception est lev�e si une colonne d�borde, c'est-�-dire si on tente
  *  de mettre un jeton dans une colonne remplie.
  */
-public interface Grid {
+public interface IGrid {
 	boolean isAvailable(int x);
 
 	/**

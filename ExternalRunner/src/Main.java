@@ -16,7 +16,7 @@ public class Main
         File lastHashingFile                = new File("lastCompilation.md5");
 
         var compilationNeeded = true;
-        String currentHash = null;
+        String currentHash;
         try
         {
             currentHash = Hashing.hashDirectory(sourcesDirectory.getAbsolutePath(), true);
@@ -34,23 +34,18 @@ public class Main
             throw new RuntimeException(eIn);
         }
 
-
         try
         {
-            var           libSeparator  = ":";
-            if (operatingSystemType().contentEquals("windows"))
-            {
-                libSeparator = ";";
-            }
             if(compilationNeeded)
             {
                 removeDirectory(backupDirectory);
                 copyDirectory(sourcesDirectory.getAbsolutePath(), backupDirectory.getAbsolutePath());
-                removeDirectory(compilationDirectory);
+
                 if (!sourcesDirectory.exists() && !sourcesDirectory.mkdirs())
                 {
                     throw new RuntimeException("Cannot make sources folder !");
                 }
+
                 List<String> sourcesFiles = checkSources(sourcesDirectory);
                 try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(sourcesFile)))
                 {
@@ -60,19 +55,64 @@ public class Main
                     }
                 }
 
+                removeDirectory(compilationDirectory);
                 if (!compilationDirectory.exists() && !compilationDirectory.mkdirs())
                 {
                     throw new RuntimeException("Cannot make sources compilation folder !");
                 }
 
-                if(runProcessIntoAnotherTerminal(workingDirectory, false,  "javac" + classPath(workingDirectory, "lib/" + operatingSystemType() + "/jcurses.jar") + " -d " + compilationDirectory.getAbsolutePath() + " @" + sourcesFile.getAbsolutePath())) {
-                  try(var bufferedWriter = new BufferedWriter(new FileWriter(lastHashingFile))) {
+                if(runProcessIntoAnotherTerminal(workingDirectory, false,  "javac" + classPath(workingDirectory, "lib/" + operatingSystemType() + "/jcurses.jar") + " -d " + compilationDirectory.getAbsolutePath() + " @" + (operatingSystemType().contentEquals("windows") ? sourcesFile.getAbsolutePath() : sourcesFile.getName()))) {
+                    Thread.sleep(2500);
+                    var success = false;
+                    var timeout = 10_000_000_000L; // 10 seconds
+                    var start = System.nanoTime();
+                    var toRemoves = new ArrayList<Integer>();
+                    while(!success) {
+                        Thread.sleep(500);
+
+                        success = true;
+                        int i = 0;
+                        toRemoves.clear();
+                        for(var sourceFile : sourcesFiles) {
+                            var sourceFilePath = Path.of(compilationDirectory.getAbsolutePath() + "/" + sourceFile.replace(sourcesDirectory.getName() + "/", "").replace(".java", ".class"));
+                            if(!Files.exists(sourceFilePath)) {
+                                success = false;
+                            } else {
+                                toRemoves.add(i);
+                            }
+                            i ++;
+                        }
+
+                        if((System.nanoTime() - start) + 500_000 >= timeout) {
+                            success = false;
+                            break;
+                        }
+
+                        if(!success) {
+                            int removeds = 0;
+                            for(var toRemove : toRemoves) {
+                                sourcesFiles.remove(toRemove - removeds);
+                                removeds ++;
+                            }
+                        }
+                    }
+
+                    if(!success) {
+                        throw new RuntimeException("Sources compilation verification failed !");
+                    }
+
+                    try(var bufferedWriter = new BufferedWriter(new FileWriter(lastHashingFile))) {
                      bufferedWriter.write(currentHash);
                   }
                 }
             }
 
-            runProcessIntoAnotherTerminal(workingDirectory, true,  "java" + classPath(compilationDirectory, "lib/" + operatingSystemType() + "/jcurses.jar") + " fr.seynax.puissance4.Puissance4");
+            var mainFile = "fr/seynax/puissance4/Puissance4";
+            if(operatingSystemType().contentEquals("windows")) {
+                mainFile = "fr.seynax.puissance4.Puissance4";
+            }
+
+            runProcessIntoAnotherTerminal(compilationDirectory, true,  "java" + classPath(compilationDirectory, "../lib/" + operatingSystemType() + "/jcurses.jar") + " " + mainFile);
         }
         catch (Exception e)
         {
@@ -81,20 +121,19 @@ public class Main
     }
 
     public static String classPath(File baseDirectoryIn, String... librariesIn) {
-        var libSeparator = ':';
+        StringBuilder classpath = new StringBuilder(" -cp ");
         if(operatingSystemType().contentEquals("windows")) {
-            libSeparator = ';';
-        }
-
-        var classpath = " -cp " + baseDirectoryIn.getAbsolutePath() + libSeparator;
-        for(int i = 0; i < librariesIn.length; i ++) {
-            if(i > 0) {
-                classpath += libSeparator;
+            classpath.append(baseDirectoryIn.getAbsolutePath()).append(";");
+            for(var library : librariesIn) {
+                classpath.append(new File(library).getAbsolutePath());
             }
-            classpath += new File("lib/" + operatingSystemType() + "/*").getAbsolutePath();
+        } else {
+            classpath.append(".:");
+            for(var library : librariesIn) {
+                classpath.append(new File(library).getPath());
+            }
         }
-
-        return classpath;
+        return classpath.toString();
     }
 
     public static void copyDirectory(String from, String to) throws IOException
@@ -117,7 +156,6 @@ public class Main
     {
         if (directory.exists() && directory.isDirectory())
         {
-            Path dir = Paths.get("path"); //path to the directory
             Files.walk(Path.of(directory.getAbsolutePath())) // Traverse the file tree in depth-first order
                     .sorted(Comparator.reverseOrder()).forEach(path ->
                     {
@@ -141,9 +179,12 @@ public class Main
 
     public static List<String> checkSources(File fileIn, File rootIn, List<String> filesListIn) throws Exception
     {
-        if (fileIn.isFile() && fileIn.getAbsolutePath().endsWith(".java"))
-        {
-            filesListIn.add(fileIn.getAbsolutePath().replace(rootIn.getAbsolutePath() + "/", ""));
+        if (fileIn.isFile() && fileIn.getAbsolutePath().endsWith(".java")) {
+            if(operatingSystemType().contentEquals("windows")) {
+                filesListIn.add(fileIn.getAbsolutePath().replace(rootIn.getAbsolutePath() + "/", ""));
+            } else {
+                filesListIn.add(fileIn.getPath().replace(rootIn.getAbsolutePath() + "/", ""));
+            }
             return filesListIn;
         }
 
@@ -213,6 +254,7 @@ public class Main
             appendProcessExecutionReportHeader(indent, processReport, workingDirectory, commandList);
             process = processBuilder.start();
             int waitForValue = process.waitFor();
+            while(process.isAlive());
             processReport.append(start(indent) + "- Wait for value : " + waitForValue + "\n");
             appendProcessExecutionReportDetails(indent, processReport, process);
         }

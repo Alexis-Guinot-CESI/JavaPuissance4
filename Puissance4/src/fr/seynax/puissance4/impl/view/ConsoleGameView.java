@@ -3,12 +3,12 @@ package fr.seynax.puissance4.impl.view;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
+import fr.seynax.puissance4.api.model.IGame;
 import fr.seynax.puissance4.core.exception.ConnectException;
-import fr.seynax.puissance4.api.model.Game;
-import fr.seynax.puissance4.core.exception.Tokens;
-import fr.seynax.puissance4.api.view.GameView;
+import fr.seynax.puissance4.api.model.IGridGameplay;
+import fr.seynax.puissance4.core.Tokens;
 
-public class ConsoleGameView implements GameView
+public class ConsoleGameView implements IGame
 {
 	// COLORS
 
@@ -33,7 +33,7 @@ public class ConsoleGameView implements GameView
 	
 	// ATTRIBUTES
 	
-	private final Game game;
+	private final IGridGameplay game;
 	
 	private final BufferedReader reader;
 	private String userInput;
@@ -46,7 +46,7 @@ public class ConsoleGameView implements GameView
 	
 	// CONSTRUCTOR
 	
-	public ConsoleGameView(Game game) {
+	public ConsoleGameView(IGridGameplay game) {
 		if (game == null) {
 			throw new IllegalArgumentException("game ne peut �tre null");
 		}
@@ -117,23 +117,23 @@ public class ConsoleGameView implements GameView
 				System.out.println("La partie a été remportée par " + winner + " !");
 			}
 		} else {
-			System.out.print("C'est au tour de [" + game.getCurrentPlayer() + "] ! [0-" + (Game.COLUMNS - 1) + "] : ");
+			System.out.print("C'est au tour de [" + game.getCurrentPlayer() + "] ! [0-" + (IGridGameplay.COLUMNS - 1) + "] : ");
 		}
 	}
 	
 	private void displayGrid() throws ConnectException {
 		StringBuffer output = new StringBuffer();
 		Tokens token;
-		for (int x = 0; x < Game.COLUMNS; x++) {
+		for (int x = 0; x < IGridGameplay.COLUMNS; x++) {
 			output.append("   " + x + "  ");
 		}
 		output.append('\n');
-		for (int y = Game.ROWS - 1; y >= 0; y--) {
-			for (int x = 0; x < Game.COLUMNS; x++) {
+		for (int y = IGridGameplay.ROWS - 1; y >= 0; y--) {
+			for (int x = 0; x < IGridGameplay.COLUMNS; x++) {
 				output.append("|     ");
 			}
 			output.append("|\n");
-			for (int x = 0; x < Game.COLUMNS; x++) {
+			for (int x = 0; x < IGridGameplay.COLUMNS; x++) {
 				output.append("|  ");
 				token = game.getToken(x, y);
 				if (token == null) {
@@ -144,7 +144,7 @@ public class ConsoleGameView implements GameView
 				output.append("  ");
 			}
 			output.append("|\n");
-			for (int x = 0; x < Game.COLUMNS; x++) {
+			for (int x = 0; x < IGridGameplay.COLUMNS; x++) {
 				output.append("|_____");
 			}
 			output.append("|\n");

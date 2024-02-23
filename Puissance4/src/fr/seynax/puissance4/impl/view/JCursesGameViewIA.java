@@ -1,20 +1,19 @@
 package fr.seynax.puissance4.impl.view;
 
+import fr.seynax.puissance4.api.model.IGame;
 import fr.seynax.puissance4.core.exception.ConnectException;
-import fr.seynax.puissance4.api.model.Game;
-import fr.seynax.puissance4.core.exception.Tokens;
-import fr.seynax.puissance4.api.view.GameView;
+import fr.seynax.puissance4.api.model.IGridGameplay;
+import fr.seynax.puissance4.core.Tokens;
 import jcurses.system.CharColor;
 import jcurses.system.Toolkit;
 
-import javax.tools.Tool;
 import java.util.*;
 
-public class JCursesGameViewIA implements GameView
+public class JCursesGameViewIA implements IGame
 {
 	// ATTRIBUTES
 
-	private final Game game;
+	private final IGridGameplay game;
 	private String errorMessage;
 	private boolean exitRequest;
 	private boolean restartRequest;
@@ -31,7 +30,7 @@ public class JCursesGameViewIA implements GameView
 
 	// CONSTRUCTOR
 
-	public JCursesGameViewIA(Game game) {
+	public JCursesGameViewIA(IGridGameplay game) {
 		if (game == null) {
 			throw new IllegalArgumentException("game ne peut �tre null");
 		}
@@ -39,7 +38,7 @@ public class JCursesGameViewIA implements GameView
 		Toolkit.init();
 		this.y = 0;
 		this.x = 0;
-		tokenPosition = (int) (Game.COLUMNS / 2);
+		tokenPosition = (int) (IGridGameplay.COLUMNS / 2);
 		this.messages = new ArrayList<>();
 		this.charColor = new CharColor(CharColor.BLACK, CharColor.WHITE);
 		redraw = true;
@@ -68,7 +67,7 @@ public class JCursesGameViewIA implements GameView
 				}
 
 				if (needAIChoice) {
-					this.tokenPosition = new Random().nextInt(Game.COLUMNS-1);
+					this.tokenPosition = new Random().nextInt(IGridGameplay.COLUMNS-1);
 					if(game.isAvailable(this.tokenPosition)) {
 						needAIChoice = false;
 						displayToken(this.tokenPosition, 2);
@@ -89,24 +88,24 @@ public class JCursesGameViewIA implements GameView
 				game.init();
 				restartRequest = false;
 				redraw = true;
-				tokenPosition = Game.COLUMNS / 2;
+				tokenPosition = IGridGameplay.COLUMNS / 2;
 				needAIChoice = true;
 			}
 		}catch (NumberFormatException e) {
 			messages.addAll(Arrays.asList(("NumberFormatException : " + e.getMessage()).split("\n")));
 			redraw = true;
 			needAIChoice = true;
-			this.tokenPosition = new Random().nextInt(Game.COLUMNS-1);
+			this.tokenPosition = new Random().nextInt(IGridGameplay.COLUMNS-1);
 		} catch (IllegalArgumentException e) {
 			messages.addAll(Arrays.asList(("IllegalArgumentException : " + e.getMessage()).split("\n")));
 			redraw = true;
 			needAIChoice = true;
-			this.tokenPosition = new Random().nextInt(Game.COLUMNS-1);
+			this.tokenPosition = new Random().nextInt(IGridGameplay.COLUMNS-1);
 		}  catch (ConnectException e) {
 			messages.addAll(Arrays.asList(("ConnectException : " + e.getMessage()).split("\n")));
 			redraw = true;
 			needAIChoice = true;
-			this.tokenPosition = new Random().nextInt(Game.COLUMNS-1);
+			this.tokenPosition = new Random().nextInt(IGridGameplay.COLUMNS-1);
 		}
 
 		if (!exitRequest) {
@@ -128,13 +127,13 @@ public class JCursesGameViewIA implements GameView
 		short lastForegroundColor = charColor.getForeground();
 		var token = game.getCurrentPlayer();
 		this.charColor.setForeground(token.getJcursesColor());
-		for(int i = 0; i < Game.ROWS; i ++) {
+		for(int i = 0; i < IGridGameplay.ROWS; i ++) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
             }
 
-			if(game.getToken(tokenPosition, (Game.ROWS-1) - i) != null) {
+			if(game.getToken(tokenPosition, (IGridGameplay.ROWS-1) - i) != null) {
 				break;
 			}
 
@@ -143,8 +142,7 @@ public class JCursesGameViewIA implements GameView
 		}
 		this.charColor.setForeground(lastForegroundColor);
 		game.putToken(this.tokenPosition);
-		tokenPosition = (int) (Game.COLUMNS / 2);
-		redraw = true;
+		tokenPosition = (int) (IGridGameplay.COLUMNS / 2);
 	}
 
 	private void displayGameState() {
@@ -168,7 +166,7 @@ public class JCursesGameViewIA implements GameView
 		} else {
 			print("C'est au tour de [");
 			print("" + game.getCurrentPlayer().getSymbol(), game.getCurrentPlayer().getJcursesColor());
-			printLn("] ! [0-" + (Game.COLUMNS - 1) + "] : ");
+			printLn("] ! [0-" + (IGridGameplay.COLUMNS - 1) + "] : ");
 		}
 	}
 
@@ -190,15 +188,15 @@ public class JCursesGameViewIA implements GameView
 		var lastForeground = this.charColor.getForeground();
 		this.charColor.setForeground(CharColor.YELLOW);
 
-		Toolkit.printString("Scores", 6 * Game.ROWS + 10, 1, this.charColor);
+		Toolkit.printString("Scores", 6 * IGridGameplay.ROWS + 10, 1, this.charColor);
 		int x = 0;
 		for(var token : scores.keySet()) {
 			var score = "" + this.scores.get(token);
 
 			this.charColor.setForeground(token.getJcursesColor());
-			Toolkit.printString("" + token.getSymbol(), 6 * Game.ROWS + 10 + x, 2, this.charColor);
+			Toolkit.printString("" + token.getSymbol(), 6 * IGridGameplay.ROWS + 10 + x, 2, this.charColor);
 			this.charColor.setForeground(CharColor.YELLOW);
-			Toolkit.printString(score, 6 * Game.ROWS + 10 + x, 3, this.charColor);
+			Toolkit.printString(score, 6 * IGridGameplay.ROWS + 10 + x, 3, this.charColor);
 			x += score.length() + 2;
 		}
 
@@ -208,18 +206,18 @@ public class JCursesGameViewIA implements GameView
 	private void displayGrid() throws ConnectException {
 		printLn("");
 		Tokens token;
-		for (int x = 0; x < Game.COLUMNS; x++) {
+		for (int x = 0; x < IGridGameplay.COLUMNS; x++) {
 			print("   " + x + "  ");
 		}
 		printLn("");
 		displayToken(tokenPosition, -1);
 
-		for (int y = Game.ROWS - 1; y >= 0; y--) {
-			for (int x = 0; x < Game.COLUMNS; x++) {
+		for (int y = IGridGameplay.ROWS - 1; y >= 0; y--) {
+			for (int x = 0; x < IGridGameplay.COLUMNS; x++) {
 				print("|     ");
 			}
 			printLn("|");
-			for (int x = 0; x < Game.COLUMNS; x++) {
+			for (int x = 0; x < IGridGameplay.COLUMNS; x++) {
 				print("|  ");
 				token = game.getToken(x, y);
 				if (token == null) {
@@ -237,7 +235,7 @@ public class JCursesGameViewIA implements GameView
 				print("  ");
 			}
 			printLn("|");
-			for (int x = 0; x < Game.COLUMNS; x++) {
+			for (int x = 0; x < IGridGameplay.COLUMNS; x++) {
 				print("|_____");
 			}
 			printLn("|");

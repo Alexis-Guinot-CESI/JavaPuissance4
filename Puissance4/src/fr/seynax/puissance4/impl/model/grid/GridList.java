@@ -1,13 +1,13 @@
 package fr.seynax.puissance4.impl.model.grid;
 
-import fr.seynax.puissance4.api.model.Grid;
+import fr.seynax.puissance4.api.model.IGrid;
 import fr.seynax.puissance4.core.exception.ConnectException;
-import fr.seynax.puissance4.core.exception.Tokens;
+import fr.seynax.puissance4.core.Tokens;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class GridList implements Grid
+public class GridList implements IGrid
 {
 	private final List<List<Tokens>> grid;
 	
